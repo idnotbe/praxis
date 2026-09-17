@@ -1,0 +1,10 @@
+# Local state is not distributable domain knowledge.
+.env
+.env.*
+!.env.example
+.praxis/
+.claude/skills/praxis/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+evals/runs/
