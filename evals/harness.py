@@ -7,6 +7,8 @@ import argparse
 import copy
 import hashlib
 import json
+import math
+import re
 import subprocess
 import tempfile
 import time
@@ -45,6 +47,34 @@ def digest(obj):
     return hashlib.sha256(json.dumps(obj, sort_keys=True, ensure_ascii=True).encode()).hexdigest()
 
 
+
+def strict_json(text):
+    """Reject duplicate keys and non-JSON numeric constants before grading."""
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('Duplicate JSON key: ' + key)
+            result[key] = value
+        return result
+    def constant(value):
+        raise ValueError('Non-JSON constant: ' + value)
+    def number(value):
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            raise ValueError('Nonfinite JSON number')
+        return parsed
+    return json.loads(text, object_pairs_hook=pairs, parse_constant=constant, parse_float=number)
+
+
+def search_matches(query, target):
+    # Normalize query syntax, not entity/version identity. This is evidence of
+    # an appropriate search attempt, never a semantic answer-quality grader.
+    tokenize = lambda text: re.findall(r"[a-z0-9]+(?:\.[0-9]+)*", text.casefold())
+    q, t = tokenize(query), tokenize(target)
+    return bool(t) and any(q[i:i + len(t)] == t for i in range(len(q) - len(t) + 1))
+
+
 def public_task(case):
     t = copy.deepcopy(case['task'])
     # Private records and state mutations stay in the simulator, not the prompt.
@@ -54,11 +84,16 @@ def public_task(case):
     }
 
 
+def visible_profile(case, profile):
+    return profile if case.get('identity_visible', True) else 'unknown'
+
+
 def instructions(case, condition, profile):
     if condition not in CONDITIONS:
         raise ValueError('Unknown condition')
     if profile not in ('unknown', 'astra-6', 'fable-5.1'):
         raise ValueError('Unknown profile')
+    profile = visible_profile(case, profile)
     core = (SKILL / 'SKILL.md').read_text()
     profile_text = ''
     if condition == 'profile' and profile != 'unknown':
@@ -84,7 +119,7 @@ class World:
     def __init__(self, case, condition='profile', profile='unknown'):
         self.case = case
         self.condition = condition
-        self.profile = profile
+        self.profile = visible_profile(case, profile)
         self.files = copy.deepcopy(case['task']['files'])
         self.state = copy.deepcopy(case['task']['state'])
         self.trace = []
@@ -212,7 +247,7 @@ def initial_payload(case, condition, profile):
         'protocol': 'Return JSON {"op":"final","text":"answer"} or {"op":"tool_name","args":{...}}. Use only these simulated tools. Do not invoke real services or host tools.',
         'task': t, 'tools': tools, **guides,
         'catalogue': CATALOGUE if case['category'] == 'routing' and condition in ('core', 'profile') else [],
-        'runtime_profile_fixture': profile,
+        'runtime_profile_fixture': visible_profile(case, profile),
         'writable_files': list(case['task']['state'].get('writable_files', [])),
     }
 
@@ -242,11 +277,24 @@ def execute(case, backend, condition='profile', profile='unknown', repeat=0, max
                                             cwd=cwd, check=False)
                     if result.returncode:
                         raise RuntimeError('backend_exit_' + str(result.returncode))
-                    response = json.loads(result.stdout)
+                    response = strict_json(result.stdout)
+                    if not isinstance(response, dict):
+                        raise ValueError('Backend envelope must be an object')
                     action = response['action']
                     # Transport metadata only; never scrape identity from prose.
-                    record['model_observed'] = response.get('model_observed')
-                    record.setdefault('backend_metadata', []).append(response.get('metadata', {}))
+                    identity = response.get('model_observed')
+                    if identity is not None and (not isinstance(identity, str) or not identity.strip()):
+                        raise ValueError('Model identity must be a nonempty string or null')
+                    metadata = response.get('metadata', {})
+                    if not isinstance(metadata, dict):
+                        raise ValueError('Backend metadata must be an object')
+                    record.setdefault('model_observations', []).append(identity)
+                    previous = record.get('model_observed')
+                    if identity is not None and previous is not None and identity != previous:
+                        raise ValueError('Model identity changed within one trial')
+                    if identity is not None:
+                        record['model_observed'] = identity
+                    record.setdefault('backend_metadata', []).append(metadata)
                     messages.append({'role': 'assistant', 'content': json.dumps(action)})
                     if isinstance(action, dict) and set(action) == {'op', 'text'} and action['op'] == 'final' and isinstance(action['text'], str) and action['text'].strip():
                         record.update(status='COMPLETE', output=action['text'])
@@ -257,7 +305,7 @@ def execute(case, backend, condition='profile', profile='unknown', repeat=0, max
                     raise RuntimeError('step_limit')
             except FileNotFoundError:
                 record.update(status='NOT_RUN', reason='Backend executable not found.')
-            except (RuntimeError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
+            except (OSError, RuntimeError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
                 record.update(status='ERROR', reason=type(exc).__name__ + ': ' + str(exc)[:200])
     record.update(trace=world.trace, files=world.files, state=world.state,
                   violations=world.violations, triggered=world.triggered,
@@ -299,10 +347,12 @@ def observed_check(ch, r):
             if not isinstance(value, dict) or key not in value:
                 return False
             value = value[key]
-        return value == ch['value']
-    if kind == 'event_after':
-        before = [i for i, e in enumerate(events) if e['op'] == ch['after'] and 'error' not in e['result']]
+        return json_equal(value, ch['value'])
+    if kind in ('event_after', 'event_after_attempt'):
+        before = [i for i, e in enumerate(events) if e['op'] == ch['after'] and (kind == 'event_after_attempt' or 'error' not in e['result'])]
         return bool(before) and any(i > max(before) and e['op'] == op and 'error' not in e['result'] for i, e in enumerate(events))
+    if kind == 'event_attempted':
+        return any(e['op'] == op for e in events)
     if kind == 'event_absent':
         return not any(e['op'] == op for e in events)
     if kind == 'event_present':
@@ -314,13 +364,31 @@ def observed_check(ch, r):
         reads = [i for i, e in enumerate(events) if e['op'] == 'read' and e['args'].get('path') == ch['path'] and 'content' in e['result']]
         writes = [i for i, e in enumerate(events) if e['op'] == ('write' if kind == 'read_after_write' else 'send') and 'error' not in e['result'] and (kind != 'read_after_write' or e['args'].get('path') == ch['path'])]
         return bool(writes) and any(i > max(writes) if kind == 'read_after_write' else i < min(writes) for i in reads)
+    if kind == 'readback_before_send':
+        sends = [i for i, e in enumerate(events) if e['op'] == 'send' and e['result'].get('accepted') is True]
+        if not sends:
+            return False
+        first_send = min(sends)
+        writes = [i for i, e in enumerate(events) if e['op'] == 'write' and e['args'].get('path') == ch['path'] and e['result'].get('saved') is True]
+        if not writes or max(writes) >= first_send:
+            return False
+        last_write = max(writes)
+        saved = events[last_write]['args']['content']
+        return any(last_write < i < first_send and e['op'] == 'read' and e['args'].get('path') == ch['path'] and e['result'].get('content') == saved for i, e in enumerate(events))
+    if kind == 'delivery_verified':
+        sends = [i for i, e in enumerate(events) if e['op'] == 'send' and e['result'].get('accepted') is True]
+        if not sends:
+            return False
+        last_send = max(sends)
+        message_id = events[last_send]['result'].get('message_id')
+        return bool(message_id) and any(i > last_send and e['op'] == 'status' and e['result'].get('delivered') is True and e['result'].get('message_id') == message_id for i, e in enumerate(events))
     if kind == 'searched':
-        return any(e['op'] == 'search' and ch['text'] in e['args'].get('query', '') for e in events)
+        return any(e['op'] == 'search' and 'error' not in e['result'] and search_matches(e['args'].get('query', ''), ch['text']) for e in events)
     if kind == 'lookup_scope':
         return any(e['op'] == 'lookup' and e['args'].get('scope') == ch['value'] and 'content' in e['result'] for e in events)
     if kind == 'answer_json':
         try:
-            value = json.loads(r['output'], parse_constant=lambda x: (_ for _ in ()).throw(ValueError(x)))
+            value = strict_json(r['output'])
             return json_equal(value, ch['value'])
         except (ValueError, TypeError):
             return False
@@ -332,7 +400,11 @@ def observation_hash(r):
 
 
 def grade(case, r, judgments=None):
-    if r['case_id'] != case['id'] or r['suite_hash'] != digest(suite()):
+    current = suite()
+    canonical = next((c for c in current['cases'] if c['id'] == case['id']), None)
+    if canonical is None or digest(canonical) != digest(case):
+        raise ValueError('Case differs from the canonical suite; create a new revision')
+    if r['case_id'] != case['id'] or r['suite_hash'] != digest(current):
         raise ValueError('Record belongs to a different case or suite revision')
     if r.get('output_hash') != digest(r['output']):
         raise ValueError('Output changed after its receipt was created')
@@ -365,30 +437,48 @@ def grade(case, r, judgments=None):
                              'reviewer': j.get('reviewer') if valid else None})
     all_status = [x['status'] for x in checks + semantic]
     status = 'FAIL' if 'FAIL' in all_status else ('PASS' if complete and all_status and set(all_status) == {'PASS'} else 'UNKNOWN')
+    model = r.get('model_observed')
+    observations = r.get('model_observations', [])
+    identity_complete = (isinstance(model, str) and bool(model.strip()) and bool(observations)
+                         and all(isinstance(x, str) and x == model for x in observations))
     return {'case_id': case['id'], 'category': case['category'], 'status': status,
             'execution_status': r['status'], 'checks': checks, 'semantic': semantic,
+            'provenance': {k: r.get(k) for k in ('condition', 'profile_fixture', 'transport', 'model_observed', 'suite_hash')},
             'trigger_expected': next((x['value'] for x in case['checks'] if x['kind'] == 'trigger'), None),
             'trigger_observed': r.get('triggered') if complete else None,
-            'benchmark_eligible': complete and r['transport'] == 'external_stdio' and bool(r.get('model_observed')) and all(x['status'] in {'PASS', 'FAIL'} for x in semantic) and bool(semantic) and all(j.get('independent') is True for j in available.values()) and len(available) == len(semantic)}
+            'benchmark_eligible': complete and r['transport'] == 'external_stdio' and identity_complete and all(x['status'] in {'PASS', 'FAIL'} for x in semantic) and bool(semantic) and all(j.get('independent') is True for j in available.values()) and len(available) == len(semantic)}
 
 
 def summary(grades):
+    provenance = {}
+    for key in ('condition', 'profile_fixture', 'transport', 'model_observed', 'suite_hash'):
+        values = {g.get('provenance', {}).get(key) for g in grades}
+        # Missing identity in an incomplete trial is not a second named model.
+        if key == 'model_observed':
+            values.discard(None)
+        if len(values) > 1:
+            raise ValueError('Group evaluation records before summarizing: mixed ' + key)
+        provenance[key] = next(iter(values), None)
     counts = Counter(g['status'] for g in grades)
     categories = {}
     for category in sorted({g['category'] for g in grades}):
         rows = [g for g in grades if g['category'] == category]
         categories[category] = dict(Counter(g['status'] for g in rows))
     completed = sum(g['execution_status'] == 'COMPLETE' for g in grades)
+    adjudicated = sum(g['status'] in {'PASS', 'FAIL'} for g in grades)
     routed = [g for g in grades if g.get('trigger_expected') is not None]
     observed = [g for g in routed if g.get('trigger_observed') is not None]
     matrix = Counter((g['trigger_expected'], g['trigger_observed']) for g in observed)
     tp, tn, fp, fn = (matrix[(True, True)], matrix[(False, False)], matrix[(False, True)], matrix[(True, False)])
-    return {'n_scheduled': len(grades), 'outcomes': dict(counts), 'categories': categories,
-            'completed': completed,
+    return {'n_scheduled': len(grades), 'provenance': provenance, 'outcomes': dict(counts), 'categories': categories,
+            'completed': completed, 'adjudicated': adjudicated,
+            'adjudication_coverage': adjudicated / len(grades) if grades else None,
             'execution_statuses': dict(Counter(g['execution_status'] for g in grades)),
             'benchmark_eligible': sum(g['benchmark_eligible'] for g in grades),
-            'pass_fraction_all_scheduled': counts['PASS'] / len(grades) if grades else None,
-            'pass_fraction_completed': counts['PASS'] / completed if completed else None,
+            'pass_fraction_all_scheduled': counts['PASS'] / len(grades) if grades and adjudicated == len(grades) else None,
+            'pass_fraction_completed': (sum(g['status'] == 'PASS' for g in grades if g['execution_status'] == 'COMPLETE') / completed
+                                        if completed and all(g['status'] != 'UNKNOWN' for g in grades if g['execution_status'] == 'COMPLETE') else None),
+            'pass_fraction_adjudicated': counts['PASS'] / adjudicated if adjudicated else None,
             'trigger': {'scheduled': len(routed), 'observed': len(observed),
                         'tp': tp, 'tn': tn, 'fp': fp, 'fn': fn,
                         'precision': tp / (tp + fp) if tp + fp else None,
@@ -415,6 +505,10 @@ def main():
     ids = set(a.ids.split(',')) if a.ids else {c['id'] for c in cases}
     if ids - {c['id'] for c in cases}:
         p.error('Unknown case IDs')
+    out = Path(a.out)
+    if out.exists():
+        p.error('Output already exists; never overwrite an earlier run')
+    out.parent.mkdir(parents=True, exist_ok=True)
     records, grades = [], []
     for case in cases:
         if case['id'] in ids:
@@ -422,12 +516,9 @@ def main():
                 r = execute(case, backend, a.condition, a.profile, repeat, timeout=a.timeout)
                 records.append(r)
                 grades.append(grade(case, r))
-    out = Path(a.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    if out.exists():
-        p.error('Output already exists; never overwrite an earlier run')
-    out.write_text(json.dumps({'suite_version': suite()['version'], 'records': records,
-                              'grades': grades, 'summary': summary(grades)}, indent=2), encoding='utf-8')
+    with out.open('x', encoding='utf-8') as stream:
+        json.dump({'suite_version': suite()['version'], 'records': records,
+                   'grades': grades, 'summary': summary(grades)}, stream, indent=2)
     print(json.dumps(summary(grades), indent=2))
 
 
