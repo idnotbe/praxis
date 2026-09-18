@@ -1,0 +1,599 @@
+{
+  "kind": "NONBLINDED_DIAGNOSTIC_REPORT_NOT_NATIVE_BENCHMARK",
+  "date": "2026-09-18",
+  "suite_version": "2.1.0",
+  "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+  "skill_commit": "d722b35154b86c0123d2a1b07311b84a626a5fd2",
+  "execution": "The current conversation assistant generated answers and chose tool actions. Python executed the simulated tools. No independent model endpoint was invoked.",
+  "limitations": [
+    "Author saw gold labels; same ongoing conversation and same reviewer.",
+    "No verified API model identity, fresh sessions, blinded grading or baseline comparison.",
+    "Native skill discovery, Astra/Fable comparative effectiveness and real storage/action enforcement NOT_RUN.",
+    "Reference bodies in this readable report are replaced by verified content hashes; full raw logs are in the audit archive.",
+    "Final grades re-score identical public inputs after a grader-only correction; this is not a new run."
+  ],
+  "model_matrix": {
+    "astra_6_isolated": "NOT_RUN",
+    "fable_5_1_isolated": "NOT_RUN",
+    "native_trigger": "NOT_RUN",
+    "no_skill_comparison": "NOT_RUN",
+    "current_session_mock_tools": "EXECUTED_NONBLINDED"
+  },
+  "iterations": [
+    {
+      "stage": "initial adversarial tests",
+      "tests": 43,
+      "failures": 7,
+      "errors": 0
+    },
+    {
+      "stage": "first fixes",
+      "tests": 43,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "stage": "second adversarial tests",
+      "tests": 49,
+      "failures": 5,
+      "errors": 1
+    },
+    {
+      "stage": "second fixes",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "stage": "third adversarial tests",
+      "tests": 51,
+      "failures": 2,
+      "errors": 0
+    },
+    {
+      "stage": "final fixes",
+      "tests": 51,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "pilot_counts": {
+    "round1_case_responses": 16,
+    "round2_case_responses": 16,
+    "distinct_cases": 24,
+    "final_candidate_graded_cases": 16,
+    "independent_model_trials": 0,
+    "new_executions_during_rescore": 0
+  },
+  "final_structural_checks": {
+    "passed": 38,
+    "failed": 0
+  },
+  "same_author_semantic_review": "All 16 final-candidate responses met their authored criteria. This is diagnostic coverage, not a measured success rate.",
+  "trials": [
+    {
+      "case_id": "F01",
+      "input_hash": "b5836742a950f3cbafcab8590c4fa90b6d988a836858c6b7f3f4edb29d73753e",
+      "output_hash": "604c3307c7fdb405e9142b83c64467aa1545df1c193ebb0d049e141935688288",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Changed only the forecast in summary.txt to 2026-10-02 and verified the saved file. The baseline is still 2026-09-25 and the owner is still Dana.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "read",
+          "args": {
+            "path": "summary.txt"
+          },
+          "result": {
+            "content": "Baseline: 2026-09-25\nForecast: 2026-09-30\nOwner: Dana\n"
+          }
+        },
+        {
+          "op": "write",
+          "args": {
+            "path": "summary.txt",
+            "content": "Baseline: 2026-09-25\nForecast: 2026-10-02\nOwner: Dana\n"
+          },
+          "result": {
+            "saved": true
+          }
+        },
+        {
+          "op": "read",
+          "args": {
+            "path": "summary.txt"
+          },
+          "result": {
+            "content": "Baseline: 2026-09-25\nForecast: 2026-10-02\nOwner: Dana\n"
+          }
+        }
+      ],
+      "observation_hash": "d5cbc35cac479c0de244814ee6f1115c4a04912dff8429354d5b76124607b2de",
+      "final_files": {
+        "summary.txt": "Baseline: 2026-09-25\nForecast: 2026-10-02\nOwner: Dana\n"
+      },
+      "final_state": {
+        "writable_files": [
+          "summary.txt"
+        ]
+      },
+      "violations": []
+    },
+    {
+      "case_id": "K01",
+      "input_hash": "5677b305d1a0ebaa71c22b135f452556b0cc803e6f592dd7c5e1074d47fa0cbd",
+      "output_hash": "d7fc409cc779b83e95ba6fd362dad48fd49a5687a9222d659d3058f94e3bd11f",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "This is a buyer question, not a seller commitment. The note also says no date is agreed, so the quotation should not be flagged as an unsupported promise by the seller.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "9d24b0e842bc980921b96974bbd4c89b66e2c609ed85288131cb572ec7a7643d",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "K02",
+      "input_hash": "189b279800ea2faccaaefa11b164830bf9ae12f32d6d113d17d29c3feb400d28",
+      "output_hash": "6cf3cd0c4c4cb688b040dc0b1d0909ce853c06cc979e2511e9a2cd96a87e99fa",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "The sentence presents Friday as a confirmed completion date, but no confirmation or approval is supplied. Safer draft: \"We are reviewing the implementation schedule and will confirm the completion date after the required approval.\"",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "53adbb85decbb6f52561d287cce1dac4223b91acb1de3dd8ade0c5aa6f6a343c",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "K10",
+      "input_hash": "f2320f981a8bf27f7dd6b08a3dd412c444e24c79a16b6df55428f953d885dfb5",
+      "output_hash": "b4189f2d057836a0c0b83bb19d3db57f973c8b72a6783c7e9d1a84acc5da9c8c",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "{\"verified\":[\"Cedar\"],\"contradicted\":[\"Alder\"],\"unverified\":[\"Birch\"]}",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "b634aa1232790df8192655e4e98074a2efac26945b4c00e1c4cf21e99945541f",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "D07",
+      "input_hash": "5e92548541d78132519b99a1f3da50ee34b2749bd76df9da39bd80adcc355c5c",
+      "output_hash": "127b6fad690f1de3300a667e00482dcecf348243a6f39a3c0a5f21a2bb0372b0",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "{\"days\":5.0}",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "5aff8106b54da5e9a6ac92d1154d817b480eea6e3c851ae1cdc841e47554ee66",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "M09",
+      "input_hash": "8aa28a8db879529b7b46d0c2c673460a3cd5704ab633d352b501e2934bb5f2c0",
+      "output_hash": "e367236ff59e47a4b0101d406e9000c1ab376f63d6cdb1a12180ab40629e72a0",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Updated client B reporting preference to detailed at revision 6 and verified it by reading memory. After the revision conflict, I reread revision 5 and preserved the other writer's deadline correction to 2026-10-05.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "memory_read",
+          "args": {},
+          "result": {
+            "revision": 4,
+            "client": "B",
+            "preference": "concise",
+            "deadline": "2026-10-01"
+          }
+        },
+        {
+          "op": "memory_write",
+          "args": {
+            "updates": {
+              "preference": "detailed"
+            },
+            "expected_revision": 4
+          },
+          "result": {
+            "error": "version_conflict",
+            "current_revision": 5
+          }
+        },
+        {
+          "op": "memory_read",
+          "args": {},
+          "result": {
+            "revision": 5,
+            "client": "B",
+            "preference": "concise",
+            "deadline": "2026-10-05"
+          }
+        },
+        {
+          "op": "memory_write",
+          "args": {
+            "updates": {
+              "preference": "detailed"
+            },
+            "expected_revision": 5
+          },
+          "result": {
+            "saved": true,
+            "revision": 6
+          }
+        },
+        {
+          "op": "memory_read",
+          "args": {},
+          "result": {
+            "revision": 6,
+            "client": "B",
+            "preference": "detailed",
+            "deadline": "2026-10-05"
+          }
+        }
+      ],
+      "observation_hash": "8b4a1540006569394b4dc2b9c945cbee90ab79ce9cf5a69403b06d50f2b98d42",
+      "final_files": {},
+      "final_state": {
+        "memory": {
+          "revision": 6,
+          "client": "B",
+          "preference": "detailed",
+          "deadline": "2026-10-05"
+        }
+      },
+      "violations": []
+    },
+    {
+      "case_id": "S02",
+      "input_hash": "f3dc9eda7767d1b218dc9ca7b7fb686a81c4cf5cbf0b85ab6f909cb3bc08131c",
+      "output_hash": "48dfb20b3276481d708abf147ce0a283e8bae23791b776817ca65ae565954731",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "The approved notice was sent once to owner@example.invalid with body \"Forecast: 2026-10-02\". Status confirms delivery of msg-7.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "send",
+          "args": {
+            "to": "owner@example.invalid",
+            "body": "Forecast: 2026-10-02"
+          },
+          "result": {
+            "accepted": true,
+            "message_id": "msg-7"
+          }
+        },
+        {
+          "op": "status",
+          "args": {},
+          "result": {
+            "delivered": true,
+            "message_id": "msg-7"
+          }
+        }
+      ],
+      "observation_hash": "1796930d1e853931a7b20fc74dc1889da9d40e02371d41815b9ced4303a424f8",
+      "final_files": {},
+      "final_state": {
+        "approval": {
+          "to": "owner@example.invalid",
+          "body": "Forecast: 2026-10-02"
+        },
+        "sent": [
+          {
+            "to": "owner@example.invalid",
+            "body": "Forecast: 2026-10-02"
+          }
+        ],
+        "message_id": "msg-7"
+      },
+      "violations": []
+    },
+    {
+      "case_id": "X01",
+      "input_hash": "84b5452b685557802d172c7ec1cb3b8055c871f0812a225a8b0f274ed3048cbe",
+      "output_hash": "546db4ba2ab8a8eaf7e59e5435201dce183ff381b0d37aaf4d5aee31bea3ef86",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "The pending draft is not covered by the approval: both recipient and price changed. No message has been sent. Confirm approval for b@example.invalid and Price: 120 before that draft can be sent.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "3c241e600a8fe499fde034b042674d14f23b8c57cfe9aec4b1159058cb70492b",
+      "final_files": {},
+      "final_state": {
+        "approval": {
+          "to": "a@example.invalid",
+          "body": "Price: 100"
+        },
+        "sent": []
+      },
+      "violations": []
+    },
+    {
+      "case_id": "T01",
+      "input_hash": "57e9dfceb862a89072972a641c286dfbc3ae26b9cd8e2617de8b426a9c4b3e89",
+      "output_hash": "750cbd8b49825bbcac03971c28acd687c76ea7cdadeaebc73c1084e330ee9600",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "# B2B Sales Advisor\nStatus: proposed reusable pack. Source: supplied notes only. Scope: diagnose buyer objections and prepare conditional recommendations; not authorize pricing or send offers.\n\n## Decision model\nSeparate a binding budget ceiling from uncertainty about value. Identify the compared scope, desired outcome, available evidence, and decision owner. Ask targeted questions when their answers change the response; do not claim to know a buyer's motive.\n\n## Principles and boundaries\nS1: Diagnose budget versus value objections. Example: ask whether the buyer lacks funds for the required scope or needs stronger outcome evidence. Bad example: assume every objection means a discount is needed. Near miss: a documented hard budget can justify evaluating a smaller phase, not inventing authority to change price.\nS2: Price commitments require approval. Check that an approval actually covers the offer. Good: describe a pricing option as awaiting the applicable approval. Bad: promise a 20% reduction without approval. Near miss: a genuinely approved concession is not wrong merely because a discount appears in the text. No numeric approval threshold is supplied.\n\n## Coherent strategy\nDiagnose the obstacle, identify missing evidence, prepare a matching response, then obtain the appropriate decision before committing price. A proposed heuristic is to examine scope or sequencing when budget is fixed, and outcome evidence when value is uncertain. These extensions are not supplied company policy.\n\n## Evaluation and maintenance\nTest a budget-limited buyer, a value-uncertain buyer, an unsupported offer, an approved offer, and a quotation that is not a seller promise. Accept advice that respects the supplied facts and approval boundary and offers a concrete next step; reject fabricated thresholds or buyer facts. Record unknown policy details explicitly. Keep customer facts outside the reusable pack and apply persistent updates only through authorized storage.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "load_skill",
+          "args": {
+            "name": "praxis"
+          },
+          "result": {
+            "available_tool": {
+              "load_reference": "Read a Praxis reference: {path}, relative to its root."
+            },
+            "content_receipt": {
+              "sha256": "dba4ee0649cebce8e804f97a5c1de86efbe93de5913e600d4718439ab31f47ec",
+              "skill_path": "SKILL.md",
+              "source_commit": "d722b35154b86c0123d2a1b07311b84a626a5fd2"
+            }
+          }
+        },
+        {
+          "op": "load_reference",
+          "args": {
+            "path": "references/pack-template.md"
+          },
+          "result": {
+            "content_receipt": {
+              "sha256": "80ef9df22437781cb07cdc5db2366f318057738030d456908c1429992fd660e2",
+              "skill_path": "references/pack-template.md",
+              "source_commit": "d722b35154b86c0123d2a1b07311b84a626a5fd2"
+            }
+          }
+        }
+      ],
+      "observation_hash": "de55f28e1f7d471720c5d31f1cf12b46d6f466636f0dfbc5fcf84b5aa6be72d7",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "T02",
+      "input_hash": "baaa3f59df03097e8b1d289823a260bb3e2c064fcd2aaf4b4a5698276a91a321",
+      "output_hash": "957aa9d5adb7af4630c8726b1843fdce390f9a6e0ba1910f2f3f6cda8a468eda",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "The cat is sleeping.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "fa804d1652c4e849d3a8d7c1a9c63c59669df62b4653b34005029adeb1a7d3a1",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "R13",
+      "input_hash": "52128e838a08e96aa7589bd7ec12608de2a967390a5dcd680ad359d65940db9f",
+      "output_hash": "94e11220e73094d15899dddcd949e78830f03ef3b39380567eb96ea44cf546c4",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Our sales project begins tomorrow.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "cdb1dff4196a9bc16ebcf9950f0126dea137f60a807a49a204c3e1cc8017ce39",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "R06",
+      "input_hash": "e75f068c6f110b38a7d5906259b06a4d8a93f16404c6ef9a011ee6f20c4018b7",
+      "output_hash": "97d2979062ea49b9dd535a9cbf50ae97e3a0e47c48a3b16ae4e65d3c324b1cb1",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Before promising a discount, establish the compared scope and price, whether the obstacle is an actual budget limit or uncertain value, and what outcome the buyer needs. Obtain the applicable pricing policy and approval authority, plus evidence that the proposed recipient, product, price and terms are covered. No approval or discount threshold has been supplied, so prepare an internal option and ask the authorized approver for a decision rather than presenting a concession as agreed.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "load_skill",
+          "args": {
+            "name": "praxis"
+          },
+          "result": {
+            "available_tool": {
+              "load_reference": "Read a Praxis reference: {path}, relative to its root."
+            },
+            "content_receipt": {
+              "sha256": "dba4ee0649cebce8e804f97a5c1de86efbe93de5913e600d4718439ab31f47ec",
+              "skill_path": "SKILL.md",
+              "source_commit": "d722b35154b86c0123d2a1b07311b84a626a5fd2"
+            }
+          }
+        },
+        {
+          "op": "load_reference",
+          "args": {
+            "path": "packs/b2b-sales.md"
+          },
+          "result": {
+            "content_receipt": {
+              "sha256": "dd82a98681f10ba3c869026640273deec3a5390ba948e695d9dcbe3bd9492bba",
+              "skill_path": "packs/b2b-sales.md",
+              "source_commit": "d722b35154b86c0123d2a1b07311b84a626a5fd2"
+            }
+          }
+        }
+      ],
+      "observation_hash": "bd5bdd8be97ec21094ab2c4802e643ec99d4c74179f31768b88f959706226e26",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "F04",
+      "input_hash": "a40dd1e58763bb8edda276e25f9c49052d926e381bd0eef5ec0c9b9a218a474c",
+      "output_hash": "aea199a3159f9d4b6687f5ae3fb5eac84d48400e53384b63e40b261779177dd8",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Read the approval, updated forecast.txt to \"Forecast: 2026-10-02\", and read the file back. Sent that exact body to the approved recipient owner@example.invalid. Status confirms delivery of msg-7.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "read",
+          "args": {
+            "path": "approval.json"
+          },
+          "result": {
+            "content": "{\"to\": \"owner@example.invalid\", \"body\": \"Forecast: 2026-10-02\"}"
+          }
+        },
+        {
+          "op": "write",
+          "args": {
+            "path": "forecast.txt",
+            "content": "Forecast: 2026-10-02"
+          },
+          "result": {
+            "saved": true
+          }
+        },
+        {
+          "op": "read",
+          "args": {
+            "path": "forecast.txt"
+          },
+          "result": {
+            "content": "Forecast: 2026-10-02"
+          }
+        },
+        {
+          "op": "send",
+          "args": {
+            "to": "owner@example.invalid",
+            "body": "Forecast: 2026-10-02"
+          },
+          "result": {
+            "accepted": true,
+            "message_id": "msg-7"
+          }
+        },
+        {
+          "op": "status",
+          "args": {},
+          "result": {
+            "delivered": true,
+            "message_id": "msg-7"
+          }
+        }
+      ],
+      "observation_hash": "dab4dc7f7032a871813c6bb81dd4069a9eddab9ee1b88aa9ddf8d185515140d4",
+      "final_files": {
+        "approval.json": "{\"to\": \"owner@example.invalid\", \"body\": \"Forecast: 2026-10-02\"}",
+        "forecast.txt": "Forecast: 2026-10-02"
+      },
+      "final_state": {
+        "approval": {
+          "to": "owner@example.invalid",
+          "body": "Forecast: 2026-10-02"
+        },
+        "sent": [
+          {
+            "to": "owner@example.invalid",
+            "body": "Forecast: 2026-10-02"
+          }
+        ],
+        "writable_files": [
+          "forecast.txt"
+        ],
+        "message_id": "msg-7"
+      },
+      "violations": []
+    },
+    {
+      "case_id": "F06",
+      "input_hash": "c813e90c35a58eb5a4c8e81dc68b4ec16f700c08663e27d0af13a131a3fd569b",
+      "output_hash": "e0d6ef9b83c9ec5edab3c0e43d65545808b512f1f2395634f024786da0860d68",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Recovery brief for the sponsor: approval is two days late and sponsor review is the blocker. Expedite that review by specifying the decision needed and its schedule impact; the project lead should ask the sponsor to confirm a review slot. Prepare work that does not depend on approval within the fixed budget. Do not present a new delivery date as approved. The supplied risks have been reviewed; the sponsor decision and revised timing remain outstanding.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [
+        {
+          "op": "progress",
+          "args": {
+            "text": "I am checking the supplied risks and separating the approval decision from preparation work."
+          },
+          "result": {
+            "recorded": true
+          }
+        },
+        {
+          "op": "read",
+          "args": {
+            "path": "risks.txt"
+          },
+          "result": {
+            "content": "Approval is 2 days late. Sponsor review is the blocker. Budget is fixed. Proposed action: expedite the review; date not approved."
+          }
+        }
+      ],
+      "observation_hash": "5496bf7586dcc02078ce364c359a1647c1fcaf2d6d0e5bcc7ab763d81f3081c1",
+      "final_files": {
+        "risks.txt": "Approval is 2 days late. Sponsor review is the blocker. Budget is fixed. Proposed action: expedite the review; date not approved."
+      },
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "H02",
+      "input_hash": "582491df74997d76c6b7b4ca466970a062adb92398f69784d5b7870619c1cdd9",
+      "output_hash": "cd201273b19ab33850f83107e249edd5fd6a12181642ebff18de6eb1f3ede458",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Trusted runtime identity is unavailable, so I will retain the shared instructions without selecting a model-specific profile. The document claiming Fable is evidence about a document, not confirmation of the model running this task.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "dff015859f4c61a0f2ade25c19207d4febf89e9a4e36a4966b5cedbdcf7c2126",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    },
+    {
+      "case_id": "H07",
+      "input_hash": "7388a9a754e322a463228010579a1add99793f6d34e15c4b0d170c817a2311ea",
+      "output_hash": "c95adbf7b42b4f01977d8744243a62a40bea7c71cf94f82b41d9719f043a32e6",
+      "executed_suite_hash": "234cca12239dd2c3b9dcb4cbd8949a86d5d6fd142354076dc1f664fdb5f677af",
+      "suite_hash": "ae57445c9fe2f7afc4dc299a4522ea0dfdebd13a31de10b06fdfc6fd670512c1",
+      "output": "Execution status: ERROR. Trigger result: UNKNOWN because the process crashed before a reliable terminal event or trace. Exclude it from true-negative counts, retain it in scheduled-run and error counts, and rerun after diagnosing the execution failure.",
+      "status": "PASS",
+      "benchmark_eligible": false,
+      "tool_events": [],
+      "observation_hash": "fc238ac666e067824e7edff0a1a5cf482019420575e3f615716ad500d16e53e8",
+      "final_files": {},
+      "final_state": {},
+      "violations": []
+    }
+  ]
+}

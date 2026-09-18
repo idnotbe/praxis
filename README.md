@@ -88,8 +88,11 @@ Run the dependency-free package checks with Python 3.10 or newer:
 python -m unittest discover -s tests -v
 ```
 
-These check packaging and evaluation fixtures, not live model behavior. The
-behavioral cases require actual target-model runs with trace inspection.
+The active evaluation suite contains 96 balanced cases and executable mock-tool
+and grader regressions. See the [evaluation guide](evals/README.md) and
+[review record](evals/REVIEW.md). A nonblinded current-session pilot is recorded;
+isolated Astra/Fable, native discovery and comparative effectiveness remain
+NOT_RUN. Package and harness checks are not live-model certification.
 Do not report an unrun model test as passing or treat structural checks as ROI.
 Keep changes scoped, inspect the diff, and use a reviewed PR. Before cleanup,
 confirm the merge and compare the expected tree. Remove only task-owned temporary
