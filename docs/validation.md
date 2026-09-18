@@ -1,3 +1,7 @@
+# Historical 0.2.0 package validation
+
+For the current 96-case evaluation framework, see [the evaluation guide](../evals/README.md) and [review record](../evals/REVIEW.md). The results below describe the earlier package release, not the new evaluation run.
+
 # Validation record
 
 Release 0.2.0 | 2026-09-18
